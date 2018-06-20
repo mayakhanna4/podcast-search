@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <title>Podcast Search Engine</title>
+   <link rel="stylesheet" href="bootstrap-3.3.7-dist/css/bootstrap.css">
+   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+   <style>
+    body{
+        background-image: url("http://longwallpapers.com/Desktop-Wallpaper/light-blue-wallpaper-full-hd-For-Desktop-Wallpaper.jpg");
+        background-color: #ff8080;
+        text-align: center;
+        font-size: 12pt;
+    }
+    h1{
+        font-family: cursive;
+        padding-bottom: 30px;
+        padding-top: 30px;
+        font-weight:bold;
+        font-size: 32pt;
+    }
+    button{
+        margin-bottom: 50px;
+    }
+    td{
+        border-right: 1px dashed;
+    }
+    th{
+        text-align: center;
+    }
+    a{
+        color: black;
+        text-align:center;
+        position:absolute;
+        right: 0;
+        margin-right: 10px;
+    }
+</style>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+    <script type="text/javascript">
+    var username ="";
+    var password = "";
+    function call(){
+      var p_name=$("#p_name").val();
+      $("#results").html("");
+      $("#subs").html("");
+      $.ajax({
+            url:"pe.php",
+            data:{id:p_name},
+            datatype:"JSON",
+      success: function(result){
+              //console.log(result);
+              var outputData=JSON.parse(result);
+              //console.log(outputData);
+              //console.log(outputData[0]["title"]);
+              var count = 0;
+              for (var el in outputData){
+                  var s =outputData[count]["title"];
+                  var newItem =$("<li>" + s+"<ul><li> Description: "+
+                  outputData[count]["description"]+"</li><li>Number of subscribers: "
+                  +outputData[count]["subscribers"]+"</li><li>URL: "+
+                  outputData[count]["url"]+"</li></ul>" + "</li>").show();
+                  $("#results").prepend(newItem);
+                  //console.log(newItem);
+                  //var info = "<ul><li> Description:"+outputData[count]["description"]+"</li><li>Number of suscribers"+outputData[count]["suscribers"]+"</li><li>URL:"+outputData[count]["url"]+"</li></ul>";
+                  //var txt3 = document.createElement("p");
+                 //txt3.innerHTML = info;
+                  //$("body").append(txt3);
+                  count = count +1;
+              }
+
+            }
+      })
+    }
+
+function subs(){
+        if(username == "" || password == ""){
+           username = prompt('Hello! Please enter your username', '');
+           password = prompt('Please enter your password', '');
+        }
+        $("#results").html("");
+        $("#subs").html("");
+        var settings = {
+              "async": true,
+              "crossDomain": true,
+              "url": "https://www.gpodder.net/api/2/auth/"+username+"/login.json",
+              "method": "POST",
+              "headers": {
+                "Authorization": "Basic + btoa(unescape(encodeURIComponent(username + ':' + password)))",
+                "Cache-Control": "no-cache",
+                "xhrFields": { "withCredentials":"true" },
+                "type": "POST",
+                "dataType": "json",
+                //"Postman-Token": "7f178059-7904-4db7-9889-27c34ad607c0",
+                //"Access-Control-Allow-Credentials": "true",
+                //"Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Credentials": "true"
+                //"Access-Control-Allow-Origin": "http://www.gpodder.net",
+                //"Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
+                //"Access-Control-Allow-Headers": "Content-Type, Accept, X-Requested-With, Session"
+              }
+            }
+    $.ajax(settings).done(function (response) {
+      //console.log(response);
+      $.ajax({
+               url:"https://www.gpodder.net/subscriptions/"+username+".json",
+               datatype:"JSON",
+               type:"GET",
+               xhrFields: { withCredentials:true },
+               headers:[
+                {
+                  "Authorization": "Basic" + btoa(unescape(encodeURIComponent(username + ':' + password)))
+                }
+                ],
+               beforeSend: function (xhr){
+                    xhr.setRequestHeader ("Cookie", response.cookie);
+                    console.log("COOKIE");
+                    console.log(response.cookie);
+
+              },
+              success: function(result){
+                 //console.log(result);
+                 var outputData=result;
+                 var count = 0;
+                 for (var el in outputData){
+                     var s =outputData[count]["title"];
+                     console.log(s);
+                     var newItem =$("<li>" + s+"<ul><li> Description: "+
+                     outputData[count]["description"]+"</li><li>Number of subscribers: "
+                     +outputData[count]["subscribers"]+"</li><li>URL: "+
+                     outputData[count]["url"]+"</li></ul>" + "</li>").show();
+
+                     $("#subs").prepend(newItem);
+                     count = count +1;
+                 }
+
+               }
+
+         })
+    });
+}
+    function genre(){
+        $("#results").html("");
+        $("#subs").html("");
+        var p_name=$("#p_name").val();
+        $.ajax({
+            url:"genre.php",
+            data:{id:p_name},
+            datatype:"JSON",
+      success: function(result){
+              console.log(result);
+              var outputData=JSON.parse(result);
+              var count = 0;
+              for (var el in outputData){
+                  var s =outputData[count]["title"];
+                  var newItem =$("<li>" + s+"<ul><li> Description: "+
+                  outputData[count]["description"]+"</li><li>Number of subscribers: "
+                  +outputData[count]["subscribers"]+"</li><li>URL: "+
+                  outputData[count]["url"]+"</li></ul>" + "</li>").show();
+                  $("#results").prepend(newItem);
+                  count = count +1;
+              }
+
+            }
+      })
+
+
+    }
+    function popular(){
+        $("#results").html("");
+        $("#subs").html("");
+        $.ajax({
+            url:"top.php",
+            data:{id:"none"},
+            datatype:"JSON",
+      success: function(result){
+              console.log(result);
+              var outputData=JSON.parse(result);
+              var count = 0;
+              for (var el in outputData){
+                  var s =outputData[count]["title"];
+                  console.log(s);
+                  var newItem =$("<li>" + s+"<ul><li> Description: "+
+                  outputData[count]["description"]+"</li><li>Number of subscribers: "
+                  +outputData[count]["subscribers"]+"</li><li>URL: "+
+                  outputData[count]["url"]+"</li></ul>" + "</li>").show();
+                  $("#subs").prepend(newItem);
+                  count = count +1;
+              }
+
+            }
+      })
+
+    }
+function trending(){
+      if(username == "" || password == ""){
+         username = prompt('Hello! Please enter your username', '');
+         password = prompt('Please enter your password', '');
+      }
+      $("#results").html("");
+      $("#subs").html("");
+      var settings = {
+            "async": true,
+            "crossDomain": true,
+            "url": "https://www.gpodder.net/api/2/auth/"+username+"/login.json",
+            "method": "POST",
+            "headers": {
+              "Authorization": "Basic + btoa(unescape(encodeURIComponent(username + ':' + password)))",
+              "Cache-Control": "no-cache",
+              "xhrFields": { "withCredentials":"true" },
+              "type": "POST",
+              "dataType": "json",
+              //"Postman-Token": "7f178059-7904-4db7-9889-27c34ad607c0",
+              //"Access-Control-Allow-Credentials": "true",
+              //"Access-Control-Allow-Origin": "*",
+              "Access-Control-Allow-Credentials": "true"
+              //"Access-Control-Allow-Origin": "http://www.gpodder.net",
+              //"Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
+              //"Access-Control-Allow-Headers": "Content-Type, Accept, X-Requested-With, Session"
+            }
+          }
+  $.ajax(settings).done(function (response) {
+    //console.log(response);
+    $.ajax({
+             url:"https://www.gpodder.net/subscriptions/"+username+".json",
+             datatype:"JSON",
+             type:"GET",
+             xhrFields: { withCredentials:true },
+             headers:[
+              {
+                "Authorization": "Basic" + btoa(unescape(encodeURIComponent(username + ':' + password)))
+              }
+              ],
+             beforeSend: function (xhr){
+                  xhr.setRequestHeader ("Cookie", response.cookie);
+                  console.log("COOKIE");
+                  console.log(response.cookie);
+
+            },
+            success: function(result){
+               //console.log(result);
+               var outputData=result;
+               var count = 0;
+               for (var el in outputData){
+                   var s =outputData[count]["title"];
+                   console.log(s);
+                   outputData.sort(function(a, b) {
+                       return a["subscribers_last_week"] - b["subscribers_last_week"];
+                   });
+                   var newItem =$("<li>" + s+"<ul><li> Description: "+
+                   outputData[count]["description"]+"</li><li>Number of subscribers last week: "
+                   +outputData[count]["subscribers_last_week"]+"</li><li>URL: "+
+                   outputData[count]["url"]+"</li></ul>" + "</li>").show();
+
+                   $("#subs").prepend(newItem);
+                   count = count +1;
+               }
+
+             }
+
+       })
+  });
+
+}
+
+
+
+    </script>
+</head>
+<body>
+
+  <h1 align = "center">Podcast Search Engine</h1>
+  <center><input type="text" id = "p_name" placeholder="Search.."></center>
+  </br>
+  <center>
+  <button type="search_button" onclick="call()">Search</button>
+  <button type="subs_button" onclick="subs()">Click to display subscriptions</button>
+  <button type="tag_button" onclick="genre()">Search by genre</button>
+  <button type="tag_button" onclick="popular()">Top 25 Podcasts</button>
+  <button type="tag_button" onclick="trending()">Trending Subscribed Podcasts</button></center>
+  <ul align="left" id=results></ul>
+  <ol align="left" id=subs> </ol>
+
+
+
+
+
+</body>
+</html>
